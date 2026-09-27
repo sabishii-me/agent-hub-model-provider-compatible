@@ -1,0 +1,9 @@
+{
+  "id": "compatible",
+  "kind": "model-provider",
+  "name": "Compatible upstream (hub provider)",
+  "provider": {
+    "apiVersion": 1,
+    "module": "provider.mjs"
+  }
+}
