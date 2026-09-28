@@ -40,7 +40,13 @@ export default {
     try {
       let response;
       try { response = await fetch(url, { headers: { authorization: `Bearer ${credential}` }, redirect: 'error', signal: controller.signal }); }
-      catch { throw error('provider_catalog_failed', 'catalog connection failed or timed out'); }
+      catch (e) {
+        // Say WHICH url failed and WHY. Swallowing the cause left a person looking at
+        // "catalog connection failed or timed out" with no way to tell a wrong port from a
+        // machine that is off, a refused connection from a DNS failure.
+        const why = e && e.name === 'AbortError' ? 'timed out after 15s' : (e && (e.cause?.message || e.message)) || 'connection failed';
+        throw error('provider_catalog_failed', `catalog request to ${url.href} failed: ${why}`);
+      }
       if (!response.ok) {
         await response.body?.cancel();
         throw error('provider_catalog_failed', `catalog request returned HTTP ${response.status}`);
@@ -55,7 +61,11 @@ export default {
           if (size > 8 * 1024 * 1024) { controller.abort(); throw error('provider_catalog_failed', 'catalog response exceeds size limit'); }
           chunks.push(Buffer.from(value));
         }
-      } catch { throw error('provider_catalog_failed', 'catalog response interrupted, timed out or exceeded size limit'); }
+      } catch (e) {
+        if (e && e.code) throw e;      // the size-limit error above already says what happened
+        const why = e && e.name === 'AbortError' ? 'timed out after 15s' : (e && e.message) || 'interrupted';
+        throw error('provider_catalog_failed', `catalog response from ${url.href} was cut short: ${why}`);
+      }
       finally { reader.releaseLock(); }
       let document;
       try { document = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
