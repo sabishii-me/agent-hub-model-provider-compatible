@@ -1,6 +1,6 @@
 {
   "id": "compatible",
-  "kind": "model-provider",
+  "pluginType": "model-provider",
   "name": "Compatible upstream (hub provider)",
   "provider": {
     "apiVersion": 1,
