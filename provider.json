@@ -1,0 +1,21 @@
+{
+  "id": "custom-compatible",
+  "version": 1,
+  "owner": "hub",
+  "name": {
+    "en": "Custom compatible service",
+    "zh-CN": "自定义兼容服务",
+    "zh-TW": "自訂相容服務",
+    "ja": "カスタム互換サービス"
+  },
+  "authMethods": ["api-key"],
+  "configuration": {
+    "modelDeclarations": true,
+    "fields": [
+      { "name": "url", "type": "url", "required": true, "label": { "en": "Service URL", "zh-CN": "服务地址", "zh-TW": "服務位址", "ja": "サービスの URL" } },
+      { "name": "api", "type": "enum", "values": ["openai-completions", "openai-responses", "anthropic-messages"], "default": "openai-completions", "label": { "en": "API protocol", "zh-CN": "API 协议", "zh-TW": "API 協定", "ja": "API プロトコル" } },
+      { "name": "token", "type": "secret", "label": { "en": "API key", "zh-CN": "API 密钥", "zh-TW": "API 金鑰", "ja": "API キー" } }
+    ]
+  },
+  "catalog": { "refresh": true }
+}

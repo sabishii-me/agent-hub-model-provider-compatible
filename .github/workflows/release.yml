@@ -1,0 +1,41 @@
+name: release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read identity + assert the tag matches the manifest
+        id: id
+        run: |
+          set -euo pipefail
+          id=$(python3 -c "import json;print(json.load(open('manifest.json'))['id'])")
+          ver=$(python3 -c "import json;print(json.load(open('manifest.json'))['version'])")
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "$tag" != "$ver" ]; then
+            echo "tag $GITHUB_REF_NAME does not match manifest version $ver" >&2
+            exit 1
+          fi
+          echo "id=$id"   >> "$GITHUB_OUTPUT"
+          echo "ver=$ver" >> "$GITHUB_OUTPUT"
+          echo "zip=model-provider-$id-$ver.zip" >> "$GITHUB_OUTPUT"
+      - name: Build the artifact (tracked files only)
+        run: |
+          set -euo pipefail
+          zip -r "${{ steps.id.outputs.zip }}" $(git ls-files)
+      - name: sha256
+        id: sha
+        run: echo "hash=$(sha256sum '${{ steps.id.outputs.zip }}' | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "$GITHUB_REF_NAME" \
+            --title "${{ steps.id.outputs.id }} ${{ steps.id.outputs.ver }}" \
+            --notes "Plugin artifact for ${{ steps.id.outputs.id }} ${{ steps.id.outputs.ver }} (sha256 ${{ steps.sha.outputs.hash }})." \
+            "${{ steps.id.outputs.zip }}"

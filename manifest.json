@@ -1,12 +1,9 @@
 {
-  "id": "compatible",
+  "id": "compatible-provider",
   "pluginType": "model-provider",
-  "name": "Compatible upstream (hub provider)",
-  "summary": "A hub model provider.",
-  "provider": {
-    "apiVersion": 1,
-    "module": "provider.mjs"
-  },
+  "name": "Custom compatible service",
+  "version": "1.0.0",
+  "summary": "A caller-named compatible endpoint: the descriptor declares NO fixed endpoint, so the person supplies url + api + token. This is the built-in custom-compatible type restated as a plugin.",
   "release": {
     "repository": "sabishii-me/agent-hub-model-provider-compatible"
   }
